@@ -23,11 +23,11 @@ data
 
 ```
 
-1. Download [MSCOCO](http://mscoco.org/dataset/#overview) and link the "train2014" folder to "data/refcoco/images/train2014".
+1. Download [MSCOCO](http://mscoco.org/dataset/#overview) and link the ```train2014``` folder to ```data/refcoco/images/train2014```.
 
-2. Download [refcoco/masks](https://drive.google.com/file/d/1oGUewiDtxjouT8Qp4dRzrPfGkc0LZaIT/view?usp=sharing) and link it to "data/refcoco/masks"
+2. Download [refcoco/masks](https://drive.google.com/file/d/1oGUewiDtxjouT8Qp4dRzrPfGkc0LZaIT/view?usp=sharing) and link it to ```data/refcoco/masks```
 
-3. Download [refcoco/anns](https://drive.google.com/file/d/1Prhrgm3t2JeY68Ni_1Ig_a4dfZvGC9vZ/view?usp=sharing) and put it under "data/refcoco/"
+3. Download [refcoco/anns](https://drive.google.com/file/d/1Prhrgm3t2JeY68Ni_1Ig_a4dfZvGC9vZ/view?usp=sharing) and put it under ```data/refcoco/```
 
 
 ## Run
