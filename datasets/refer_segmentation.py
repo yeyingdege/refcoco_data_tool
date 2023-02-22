@@ -53,6 +53,7 @@ class RefCOCO(ReferSegDataset):
         '''Visualize image box and phrase annotation, 
         given an index (not COCO image id) or image name.
         '''
+        print('\nVisualizing image', i)
         if isinstance(i, int):
             info = self.img_infos[i]
             img_file = osp.join(self.im_dir, info["img_file"])
@@ -76,11 +77,14 @@ class RefCOCO(ReferSegDataset):
                 collect_box_text[box] = set()
             collect_box_text[box].add(text)
 
-        for box, texts in collect_box_text.items():
+        for ii, (box, texts) in enumerate(collect_box_text.items()):
+            print('bbox {}: ({:.2f}, {:.2f}), ({:.2f}, {:.2f})'.format(ii, box[0], box[1], box[2], box[3]))
             draw.rectangle(box, outline='red')
             for c, text in enumerate(texts):
                 print(text)
                 draw.text((box[0], box[1] + c*15), text, fill='yellow', font=fnt)
+            # box_str = '('+str(box[0])+', '+str(box[1])+'\t'+str(box[2])+', '+str(box[3])+')'
+            # draw.text((box[0], box[1] + (c+1)*15), box_str, fill='yellow', font=fnt)
         if not osp.exists(out_dir):
             os.mkdir(out_dir)
         img.save(f"./{out_dir}/refcoco_{i}.jpg")
@@ -141,4 +145,4 @@ if __name__ == "__main__":
     testB = build_refcoco_segmentation(split='testB')
     for i in range(0, 200, 50):
         testB.visualize_image_info(i)
-    testB.visualize_image_info("COCO_train2014_000000580238.jpg")
+    testB.visualize_image_info("COCO_train2014_000000000154.jpg")
