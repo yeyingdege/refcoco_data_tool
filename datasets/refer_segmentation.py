@@ -53,19 +53,21 @@ class RefCOCO(ReferSegDataset):
         '''Visualize image box and phrase annotation, 
         given an index (not COCO image id) or image name.
         '''
-        print('\nVisualizing image', i)
         if isinstance(i, int):
             info = self.img_infos[i]
             img_file = osp.join(self.im_dir, info["img_file"])
             phrase = info["phrase"]
             boxes = info["boxes"]
+            suffix = info["img_file"].split('.')[0]
         elif isinstance(i, str):
             info = self.box_phrases_dict[i]
             img_file = osp.join(self.im_dir, i)
             phrase = info["phrase"]
             boxes = info["boxes"]
+            suffix = i.split('.')[0]
         else:
             raise TypeError("Only support index or image name as input!")
+        print('\nVisualizing image', img_file)
         img = Image.open(img_file)
         draw = ImageDraw.Draw(img)
         # fnt = ImageFont.truetype("Pillow/Tests/fonts/FreeMono.ttf", 15)
@@ -87,7 +89,7 @@ class RefCOCO(ReferSegDataset):
             # draw.text((box[0], box[1] + (c+1)*15), box_str, fill='yellow', font=fnt)
         if not osp.exists(out_dir):
             os.mkdir(out_dir)
-        img.save(f"./{out_dir}/refcoco_{i}.jpg")
+        img.save(f"./{out_dir}/refcoco_{suffix}.jpg")
 
 
 def make_refer_seg_transforms(img_size=224 ,max_img_size=1333 ,test=False):
@@ -143,6 +145,6 @@ def build_refcoco_segmentation(
 if __name__ == "__main__":
     # examples
     testB = build_refcoco_segmentation(split='testB')
-    for i in range(0, 200, 50):
-        testB.visualize_image_info(i)
+    # for i in range(0, 750, 10):
+    #     testB.visualize_image_info(i)
     testB.visualize_image_info("COCO_train2014_000000000154.jpg")
