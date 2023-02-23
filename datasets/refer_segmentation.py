@@ -78,9 +78,11 @@ class RefCOCO(ReferSegDataset):
             if box not in collect_box_text:
                 collect_box_text[box] = set()
             collect_box_text[box].add(text)
-
+        print('image width and height: ({}, {})'.format(img.width, img.height))
         for ii, (box, texts) in enumerate(collect_box_text.items()):
-            print('bbox {}: ({:.2f}, {:.2f}), ({:.2f}, {:.2f})'.format(ii, box[0], box[1], box[2], box[3]))
+            cx, cy = (box[0] + box[2]) / 2, (box[1] + box[3]) / 2
+            w, h = box[2] - box[0], box[3] - box[1]
+            print('bbox {}: ({:.2f}, {:.2f}), ({:.2f}, {:.2f})'.format(ii, cx, cy, w, h))
             draw.rectangle(box, outline='red')
             for c, text in enumerate(texts):
                 print(text)
