@@ -14,7 +14,8 @@ data
 ├── refcoco
 |   ├── anns
 |   |   ├── refcoco
-|   |   ├── ...
+|   |   ├── refcoco+
+|   |   ├── refcocog
 │   ├── images
 |   │   ├── train2014  # images from train 2014
 │   ├── masks

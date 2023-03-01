@@ -150,14 +150,16 @@ def build_refcoco_segmentation(
         bert_model=bert_model
     )
 
+
 if __name__ == "__main__":
     # examples
-    testB = build_refcoco_segmentation(split='testB')
-    testB.visualize_image_info("COCO_train2014_000000000154.jpg")
+    # ds = build_refcoco_segmentation(split='testB', version='refcoco_unc') # 750 images
+    ds = build_refcoco_segmentation(split='val', version='refcocog_google') # 4650 images
+    # ds.visualize_image_info("COCO_train2014_000000000154.jpg")
     # for i in range(0, 750, 10):
-    #     testB.visualize_image_info(i)
+    #     ds.visualize_image_info(i)
     
-    # with open('testB_list.txt', 'r') as f:
-    #     img_list = f.readlines()
-    # for img in img_list:
-    #     testB.visualize_image_info(img.strip())
+    with open('refcocog_google_list.txt', 'r') as f:
+        img_list = f.readlines()
+    for img in img_list:
+        ds.visualize_image_info(img.strip())
