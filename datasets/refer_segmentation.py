@@ -83,17 +83,17 @@ class RefCOCO(ReferSegDataset):
             collect_box_text[box].add(text)
         print('image width and height: ({}, {})'.format(img.width, img.height))
         for ii, (box, texts) in enumerate(collect_box_text.items()):
-            cx, cy = (box[0] + box[2]) / 2, (box[1] + box[3]) / 2
-            w, h = box[2] - box[0], box[3] - box[1]
-            print('bbox {}: ({:.2f}, {:.2f}), ({:.2f}, {:.2f})'.format(ii, cx, cy, w, h))
+            cx, cy = int((box[0] + box[2]) / 2), int((box[1] + box[3]) / 2)
+            w, h = int(box[2] - box[0]), int(box[3] - box[1])
+            print('bbox {}: ({}, {}), ({}, {})'.format(ii+1, cx, cy, w, h))
             draw.rectangle(box, outline=color_set[ii], width=4)
             draw.text((box[0]+15, box[1]+15), str(ii+1), fill=color_set[ii], font=fnt_large)
             # draw expression
-            # for c, text in enumerate(texts):
-            #     print(text)
-            #     draw.text((box[0]+10, box[1] + c*15), text, fill=color_set[ii], font=fnt_small)
+            for c, text in enumerate(texts):
+                print(text)
+                # draw.text((box[0]+10, box[1] + c*15), text, fill=color_set[ii], font=fnt_small)
             # draw bbox coordinate
-            # box_str = '('+str(box[0])+', '+str(box[1])+'\t'+str(box[2])+', '+str(box[3])+')'
+            # box_str = '('+str(int(box[0]))+', '+str(int(box[1]))+'\t'+str(int(box[2]))+', '+str(int(box[3]))+')'
             # draw.text((box[0]+10, box[1] + (c+1)*15), box_str, fill=color_set[ii], font=fnt_small)
         if not osp.exists(out_dir):
             os.mkdir(out_dir)
