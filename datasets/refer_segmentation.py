@@ -53,6 +53,8 @@ class RefCOCO(ReferSegDataset):
         '''Visualize image box and phrase annotation, 
         given an index (not COCO image id) or image name.
         '''
+        color_set = [(127,255,255), (255,255,127), (255,127,255), (255,0,0), (0,255,0), (0,0,255), \
+                     (255,127,127), (127,255,127), (127,127,255), (127,0,0), (0,127,0), (0,0,127)]
         if isinstance(i, int):
             info = self.img_infos[i]
             img_file = osp.join(self.im_dir, info["img_file"])
@@ -71,7 +73,8 @@ class RefCOCO(ReferSegDataset):
         img = Image.open(img_file)
         draw = ImageDraw.Draw(img)
         # fnt = ImageFont.truetype("Pillow/Tests/fonts/FreeMono.ttf", 15)
-        fnt = ImageFont.truetype("STXINWEI.TTF", size=15)
+        fnt_large = ImageFont.truetype("STXINWEI.TTF", size=30)
+        fnt_small = ImageFont.truetype("STXINWEI.TTF", size=15)
         collect_box_text = {}
         for box, text in zip(boxes, phrase):
             box = tuple(box[0])
@@ -83,12 +86,15 @@ class RefCOCO(ReferSegDataset):
             cx, cy = (box[0] + box[2]) / 2, (box[1] + box[3]) / 2
             w, h = box[2] - box[0], box[3] - box[1]
             print('bbox {}: ({:.2f}, {:.2f}), ({:.2f}, {:.2f})'.format(ii, cx, cy, w, h))
-            draw.rectangle(box, outline='red')
-            for c, text in enumerate(texts):
-                print(text)
-                draw.text((box[0], box[1] + c*15), text, fill='yellow', font=fnt)
+            draw.rectangle(box, outline=color_set[ii], width=4)
+            draw.text((box[0]+15, box[1]+15), str(ii+1), fill=color_set[ii], font=fnt_large)
+            # draw expression
+            # for c, text in enumerate(texts):
+            #     print(text)
+            #     draw.text((box[0]+10, box[1] + c*15), text, fill=color_set[ii], font=fnt_small)
+            # draw bbox coordinate
             # box_str = '('+str(box[0])+', '+str(box[1])+'\t'+str(box[2])+', '+str(box[3])+')'
-            # draw.text((box[0], box[1] + (c+1)*15), box_str, fill='yellow', font=fnt)
+            # draw.text((box[0]+10, box[1] + (c+1)*15), box_str, fill=color_set[ii], font=fnt_small)
         if not osp.exists(out_dir):
             os.mkdir(out_dir)
         img.save(f"./{out_dir}/refcoco_{suffix}.jpg")
@@ -147,6 +153,11 @@ def build_refcoco_segmentation(
 if __name__ == "__main__":
     # examples
     testB = build_refcoco_segmentation(split='testB')
+    testB.visualize_image_info("COCO_train2014_000000000154.jpg")
     # for i in range(0, 750, 10):
     #     testB.visualize_image_info(i)
-    testB.visualize_image_info("COCO_train2014_000000000154.jpg")
+    
+    # with open('testB_list.txt', 'r') as f:
+    #     img_list = f.readlines()
+    # for img in img_list:
+    #     testB.visualize_image_info(img.strip())
