@@ -49,7 +49,7 @@ class RefCOCO(ReferSegDataset):
             img_infos.append(info)
         return img_infos, box_phrases_dict
 
-    def visualize_image_info(self, i, out_dir='output'):
+    def visualize_image_info(self, i, out_dir='output', draw_phrase=False):
         '''Visualize image box and phrase annotation, 
         given an index (not COCO image id) or image name.
         '''
@@ -71,6 +71,8 @@ class RefCOCO(ReferSegDataset):
             raise TypeError("Only support index or image name as input!")
         print('\nVisualizing image', img_file)
         img = Image.open(img_file)
+        if img.mode == "L": # grayscale image
+            img = img.convert("RGB")
         draw = ImageDraw.Draw(img)
         # fnt = ImageFont.truetype("Pillow/Tests/fonts/FreeMono.ttf", 15)
         fnt_large = ImageFont.truetype("STXINWEI.TTF", size=30)
@@ -87,11 +89,13 @@ class RefCOCO(ReferSegDataset):
             w, h = int(box[2] - box[0]), int(box[3] - box[1])
             print('bbox {}: ({}, {}), ({}, {})'.format(ii+1, cx, cy, w, h))
             draw.rectangle(box, outline=color_set[ii], width=4)
-            draw.text((box[0]+15, box[1]+15), str(ii+1), fill=color_set[ii], font=fnt_large)
+            if not draw_phrase:
+                draw.text((box[0]+15, box[1]+15), str(ii+1), fill=color_set[ii], font=fnt_large)
             # draw expression
             for c, text in enumerate(texts):
                 print(text)
-                # draw.text((box[0]+10, box[1] + c*15), text, fill=color_set[ii], font=fnt_small)
+                if draw_phrase:
+                    draw.text((box[0]+10, box[1] + c*15), text, fill=color_set[ii], font=fnt_small)
             # draw bbox coordinate
             # box_str = '('+str(int(box[0]))+', '+str(int(box[1]))+'\t'+str(int(box[2]))+', '+str(int(box[3]))+')'
             # draw.text((box[0]+10, box[1] + (c+1)*15), box_str, fill=color_set[ii], font=fnt_small)
@@ -151,15 +155,39 @@ def build_refcoco_segmentation(
     )
 
 
+def traverse_datasets(root="data/refcoco/anns_spatial", 
+                    im_dir="./data/refcoco/images/train2014",
+                    seg_dir="./data/refcoco/masks"):
+    ds = ReferSegDataset(data_root=root, im_dir=im_dir, seg_dir=seg_dir)
+    DATASETS = ds.SUPPORTED_DATASETS
+    out_str = "version,split,num_images,num_phrase\n"
+    for version, meta_data in DATASETS.items():
+        for split in meta_data["splits"]:
+            if split == "trainval":
+                continue
+            dataset = build_refcoco_segmentation(split=split, version=version, data_root=root)
+            # generate result string
+            num_images = len(dataset.box_phrases_dict)
+            num_phrase = 0
+            for item in dataset.img_infos:
+                num_phrase += len(item["phrase"])
+            line = version + "," + split + "," + str(num_images) + "," + str(num_phrase) + "\n"
+            out_str = out_str + line
+            # Visualize images
+            for i in range(0, 30, 10):
+                dataset.visualize_image_info(i, draw_phrase=True)
+    out_csv_file = "output/info.csv"
+    with open(out_csv_file, "w") as fp:
+        fp.write(out_str)
+
+
+
 if __name__ == "__main__":
     # examples
     # ds = build_refcoco_segmentation(split='testB', version='refcoco_unc') # 750 images
-    ds = build_refcoco_segmentation(split='val', version='refcocog_google') # 4650 images
+    # ds = build_refcoco_segmentation(split='test', version='refcocog_umd', data_root='data/refcoco/anns_spatial')
     # ds.visualize_image_info("COCO_train2014_000000000154.jpg")
-    # for i in range(0, 750, 10):
-    #     ds.visualize_image_info(i)
-    
-    with open('refcocog_google_list.txt', 'r') as f:
-        img_list = f.readlines()
-    for img in img_list:
-        ds.visualize_image_info(img.strip())
+    # for i in range(0, 50, 10):
+    #     ds.visualize_image_info(i, draw_phrase=True)
+
+    traverse_datasets()
