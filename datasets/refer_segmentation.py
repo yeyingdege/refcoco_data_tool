@@ -155,39 +155,11 @@ def build_refcoco_segmentation(
     )
 
 
-def traverse_datasets(root="data/refcoco/anns_spatial", 
-                    im_dir="./data/refcoco/images/train2014",
-                    seg_dir="./data/refcoco/masks"):
-    ds = ReferSegDataset(data_root=root, im_dir=im_dir, seg_dir=seg_dir)
-    DATASETS = ds.SUPPORTED_DATASETS
-    out_str = "version,split,num_images,num_phrase\n"
-    for version, meta_data in DATASETS.items():
-        for split in meta_data["splits"]:
-            if split == "trainval":
-                continue
-            dataset = build_refcoco_segmentation(split=split, version=version, data_root=root)
-            # generate result string
-            num_images = len(dataset.box_phrases_dict)
-            num_phrase = 0
-            for item in dataset.img_infos:
-                num_phrase += len(item["phrase"])
-            line = version + "," + split + "," + str(num_images) + "," + str(num_phrase) + "\n"
-            out_str = out_str + line
-            # Visualize images
-            for i in range(0, 30, 10):
-                dataset.visualize_image_info(i, draw_phrase=True)
-    out_csv_file = "output/info.csv"
-    with open(out_csv_file, "w") as fp:
-        fp.write(out_str)
-
-
 
 if __name__ == "__main__":
     # examples
-    # ds = build_refcoco_segmentation(split='testB', version='refcoco_unc') # 750 images
+    ds = build_refcoco_segmentation(split='testB', version='refcoco_unc') # 750 images
     # ds = build_refcoco_segmentation(split='test', version='refcocog_umd', data_root='data/refcoco/anns_spatial')
-    # ds.visualize_image_info("COCO_train2014_000000000154.jpg")
-    # for i in range(0, 50, 10):
-    #     ds.visualize_image_info(i, draw_phrase=True)
-
-    traverse_datasets()
+    ds.visualize_image_info("COCO_train2014_000000000154.jpg")
+    for i in range(0, 50, 10):
+        ds.visualize_image_info(i, draw_phrase=True)
