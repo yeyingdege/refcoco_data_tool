@@ -4,3 +4,5 @@ cython
 scipy
 opencv-python
 transformers
+openai
+python-dotenv
