@@ -22,7 +22,7 @@ class SpatialReasoningDataset(Dataset):
 
     def _load_annotations(self):
         dname = self.version.split("_")[0]
-        ann_dir = os.path.join(self.data_root, dname)
+        ann_dir = os.path.join(self.ann_root, dname)
         ann_name = f"{self.version}_{self.split}_dict.pth"
         ann_file = os.path.join(ann_dir, ann_name)
         anns = torch.load(ann_file)

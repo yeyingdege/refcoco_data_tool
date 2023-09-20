@@ -31,6 +31,14 @@ data
 3. Download [refcoco/anns](https://drive.google.com/file/d/1Prhrgm3t2JeY68Ni_1Ig_a4dfZvGC9vZ/view?usp=sharing) and put it under ```data/refcoco/```
 
 
-## Run
+## Build Spatial Reasoning Dataset
+1. Run the following script to process RefCOCO dataset. It generates new annotation files under ```data/refcoco/anns_spatial```
+```
+python datasets/build_spatial_anno.py
+```
+2. New dataloader (under development): ```datasets/SpatialReasoningDataset.py```
+
+
+## Old dataloader
 
 Run ```datasets/refer_segmentation.py``` at root directory to dive into the dataloader and visualize annotations.
