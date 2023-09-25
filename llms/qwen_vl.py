@@ -39,10 +39,7 @@ class Qwen_VL():
         inputs = inputs.to(self.model.device)
         pred = self.model.generate(**inputs)
         raw_response = self.tokenizer.decode(pred.cpu()[0], skip_special_tokens=False)
-        """
-        Picture 1:<img>/home/yanghong/source/refcoco_data_tool/data/refcoco/images/train2014/COCO_train2014_000000000154.jpg</img>
-        Generate the caption in English: zebras in a field , grazing .<|endoftext|>
-        """
+        
         response = self._process_response(raw_response, txt_pt=self.default_caption_prompt)
         # image = self.tokenizer.draw_bbox_on_latest_picture(raw_response)
         # if image:
