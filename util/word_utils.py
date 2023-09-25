@@ -100,3 +100,9 @@ class Corpus(object):
 
     def __len__(self):
         return len(self.dictionary)
+    
+
+def remove_whitespace(input_str):
+    input_str = input_str.replace("    ", "")
+    input_str = input_str.replace("\t", "")
+    return input_str

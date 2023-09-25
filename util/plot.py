@@ -44,3 +44,18 @@ def visualize_image_info(image_name, boxes, phrase, draw_phrase=False,
     os.makedirs(out_dir, exist_ok=True)
     img.save(f"{out_dir}/{image_name}")
 
+
+def resize_image_with_aspect_ratio(image, new_width):
+    """
+    Resize a PIL image while maintaining its aspect ratio.
+
+    :param image: PIL Image object
+    :param new_width: New width in pixels
+    :return: Resized PIL Image object
+    """
+    width, height = image.size
+    new_height = int(height * (new_width / width))
+    
+    # Resize the image using the new dimensions
+    resized_image = image.resize((new_width, new_height))
+    return resized_image
