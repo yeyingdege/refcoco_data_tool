@@ -4,6 +4,7 @@ import openai
 
 sys.path.append(os.getcwd())
 from util.logger import setup_logger
+from util.word_utils import remove_whitespace
 from util.plot import visualize_image_info
 
 
@@ -22,10 +23,6 @@ def get_completion(prompt, model="gpt-3.5-turbo",
     logger.info("response:\n{}".format(response.choices[0].message["content"]))
     return response.choices[0].message["content"]
 
-def remove_whitespace(input_str):
-    input_str = input_str.replace("    ", "")
-    input_str = input_str.replace("\t", "")
-    return input_str
 
 def gen_prompt(phrases):
     prompt = f"""
