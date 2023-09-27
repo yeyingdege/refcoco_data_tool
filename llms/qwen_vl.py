@@ -40,27 +40,54 @@ class Qwen_VL():
         pred = self.model.generate(**inputs)
         raw_response = self.tokenizer.decode(pred.cpu()[0], skip_special_tokens=False)
         
-        response = self._process_response(raw_response, txt_pt=self.default_caption_prompt)
+        result_dict = self._process_response(raw_response, txt_pt=text)
         # image = self.tokenizer.draw_bbox_on_latest_picture(raw_response)
         # if image:
         #     image.save('2.jpg')
         # else:
         #     print("no box")
-        return response
+        return result_dict
 
 
     def _process_response(self, response, txt_pt, endoftext="<|endoftext|>"):
         start = response.find(txt_pt)
-        output = response[start+len(txt_pt):]
-        output = output.replace(endoftext, "")
-        output = output.strip()
-        return output
+        out_str = response[start+len(txt_pt):]
+        out_str = out_str.replace(endoftext, "")
+        out_str, phrases = self._extract_ref(out_str)
+        out_str, bbox = self._extract_bbox(out_str)
+        out_str = out_str.strip()
+        result_dict = {"raw_response": response,
+                       "processed_response": out_str,
+                       "bboxes": bbox,
+                       "phrases": phrases}
+        return result_dict
+    
+    def _extract_ref(self, s):
+        phrases = []
+        while "<ref>" in s:
+            begin = s.find("<ref>")
+            end = s.find("</ref>")
+            p = s[begin:end] + "</ref>"
+            phrases.append(p[5:-6])
+            s = s.replace(p, p[5:-6])
+        return s, phrases
+    
+    def _extract_bbox(self, s):
+        bbox = []
+        while "<box>" in s:
+            begin = s.find("<box>")
+            end = s.find("</box>")
+            box = s[begin:end] + "</box>"
+            bbox.append(box[5:-6])
+            s = s.replace(box, "")
+        return s, bbox
 
 
 if __name__=="__main__":
-    test_image = 'data/refcoco/images/train2014/COCO_train2014_000000000154.jpg'
+    test_image = 'data/refcoco/images/train2014/COCO_train2014_000000297370.jpg'
     test_image = os.path.join(os.getcwd(), test_image)
 
     qwen = Qwen_VL()
-    response = qwen.get_response(test_image)
-    print(response)
+    response = qwen.get_response(test_image, text=qwen.default_grounding_prompt)
+    print(response["processed_response"])
+

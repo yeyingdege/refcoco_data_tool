@@ -1,6 +1,7 @@
 import os
 import json
 import torch
+import csv
 from grounding_datasets import ReferSegDataset
 from refer_segmentation import build_refcoco_segmentation
 
@@ -29,9 +30,9 @@ SUPPORTED_SR_DATASETS = {
         'splits': ('train', 'val', 'trainval', 'testA', 'testB'),
         'params': {'dataset': 'refcoco', 'split_by': 'unc'}
     },
-    'refcocog_google': {
-        'splits': ('train', 'val'),
-        'params': {'dataset': 'refcocog', 'split_by': 'google'}
+    'refcocog_umd': {
+        'splits': ('train', 'val', 'test'),
+        'params': {'dataset': 'refcocog', 'split_by': 'umd'}
     }
 }
 
@@ -125,7 +126,55 @@ def traverse_datasets(root="data/refcoco/anns_spatial",
         fp.write(out_str)
 
 
+def write_dict_to_csv(json_file):
+    # save caption to csv for better viewing
+    d = json.load(open(json_file))
+    csv_file = json_file.replace("json", "csv")
+    col_name = ["image_name", "caption", "version", "split"]
+    with open(csv_file, 'w') as csvFile:
+        wr = csv.DictWriter(csvFile, fieldnames=col_name)
+        wr.writeheader()
+        for iname, v in d.items():
+            row = {col_name[0]:iname, col_name[1]:v[col_name[1]], 
+                   col_name[2]:v[col_name[2]], col_name[3]:v[col_name[3]]}
+            wr.writerow(row)
+
+
+def get_image_caption_qwen(qwen, im_dir="./data/refcoco/images/train2014",
+                           out_root="data/refcoco/anns_spatial"):
+    captions = {}
+    curr_dir = os.getcwd()
+    for version, meta_data in SUPPORTED_SR_DATASETS.items():
+        dataset_dir = version.split('_')[0]
+        out_dir = os.path.join(out_root, dataset_dir)
+        os.makedirs(out_root, exist_ok=True)
+        for split in meta_data["splits"]:
+            if split in ["train", "trainval"]:
+                continue
+            input_file = os.path.join(out_dir, f'{version}_{split}_dict.pth')
+            input_data = torch.load(input_file)
+            for iname, v in input_data.items():
+                if iname in captions:
+                    continue
+                full_path = os.path.join(curr_dir, im_dir, iname)
+                response = qwen.get_response(full_path, text=qwen.default_grounding_prompt)
+                captions[iname] = {"caption": response["processed_response"],
+                                   "raw_response": response["raw_response"], 
+                                   "bboxes": response["bboxes"],
+                                   "version": version, "split": split}
+                print(response["processed_response"])
+    # save dict to json file
+    save_name = os.path.join(out_root, "captions_with_grounding.json") # 4163
+    with open(save_name, "w") as fp:
+        json.dump(captions, fp)
+    write_dict_to_csv(save_name)
+
+
 if __name__ == "__main__":
-    preps = load_prepositions()
-    filter_anns(preps=preps)
+    # preps = load_prepositions()
+    # filter_anns(preps=preps)
     # traverse_datasets()
+
+    from llms.qwen_vl import Qwen_VL
+    qwen = Qwen_VL()
+    get_image_caption_qwen(qwen)
