@@ -2,8 +2,9 @@ import os
 import json
 import torch
 import csv
-from grounding_datasets import ReferSegDataset
 from refer_segmentation import build_refcoco_segmentation
+from SpatialReasoningDataset import SpatialReasoningDataset
+from util.plot import visualize_image_info
 
 
 def load_prepositions(file="data/prepositions.txt"):
@@ -101,26 +102,25 @@ def filter_anns(root="data/refcoco/anns",
             print(f"{version}/{split},{len(data_filtered_by_box_num)} images,{num_phrase} phrase after filtering")
 
 
-def traverse_datasets(root="data/refcoco/anns_spatial", 
-                    im_dir="./data/refcoco/images/train2014",
-                    seg_dir="./data/refcoco/masks"):
-    DATASETS = SUPPORTED_SR_DATASETS
+def traverse_datasets(root="data/refcoco/anns_spatial", num_vis_image=5):
     out_str = "version,split,num_images,num_phrase\n"
-    for version, meta_data in DATASETS.items():
+    for version, meta_data in SUPPORTED_SR_DATASETS.items():
         for split in meta_data["splits"]:
             if split == "trainval":
                 continue
-            dataset = build_refcoco_segmentation(split=split, version=version, data_root=root)
+            dataset = SpatialReasoningDataset(split=split, version=version, ann_root=root)
             # generate result string
-            num_images = len(dataset.box_phrases_dict)
-            num_phrase = 0
-            for item in dataset.img_infos:
-                num_phrase += len(item["phrase"])
+            num_images = len(dataset.anns)
+            num_phrase = len(dataset)
             line = version + "," + split + "," + str(num_images) + "," + str(num_phrase) + "\n"
             out_str = out_str + line
             # Visualize images
-            for i in range(0, 30, 10):
-                dataset.visualize_image_info(i, draw_phrase=True)
+            for i in range(num_vis_image):
+                iname = dataset.idx_to_iname[i]
+                ann = dataset.anns[iname]
+                box = ann["box"]
+                visualize_image_info(iname, boxes=None, phrase=None, collect_box_text=box, 
+                                     draw_phrase=True, out_dir=f'output/{version}/{split}')
     out_csv_file = "output/info.csv"
     with open(out_csv_file, "w") as fp:
         fp.write(out_str)
@@ -173,7 +173,7 @@ def get_image_caption_qwen(qwen, im_dir="./data/refcoco/images/train2014",
 if __name__ == "__main__":
     # preps = load_prepositions()
     # filter_anns(preps=preps)
-    # traverse_datasets()
+    # traverse_datasets(num_vis_image=5)
 
     from llms.qwen_vl import Qwen_VL
     qwen = Qwen_VL()
