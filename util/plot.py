@@ -3,7 +3,7 @@ import os.path as osp
 from PIL import Image, ImageDraw, ImageFont
 
 
-def visualize_image_info(image_name, boxes, phrase, draw_phrase=False, 
+def visualize_image_info(image_name, boxes=None, phrase=None, collect_box_text=None, draw_phrase=False, 
                          image_dir="data/refcoco/images/train2014", out_dir='output'):
     '''Visualize image box and phrase annotation, 
     given an index (not COCO image id) or image name.
@@ -20,11 +20,12 @@ def visualize_image_info(image_name, boxes, phrase, draw_phrase=False,
     # fnt = ImageFont.truetype("Pillow/Tests/fonts/FreeMono.ttf", 15)
     fnt_large = ImageFont.truetype("STXINWEI.TTF", size=30)
     fnt_small = ImageFont.truetype("STXINWEI.TTF", size=15)
-    collect_box_text = {}
-    for box, text in zip(boxes, phrase):
-        if box not in collect_box_text:
-            collect_box_text[box] = set()
-        collect_box_text[box].add(text)
+    if collect_box_text == {} or collect_box_text is None:
+        collect_box_text = {}
+        for box, text in zip(boxes, phrase):
+            if box not in collect_box_text:
+                collect_box_text[box] = set()
+            collect_box_text[box].add(text)
     print('image width and height: ({}, {})'.format(img.width, img.height))
     for ii, (box, texts) in enumerate(collect_box_text.items()):
         cx, cy = int((box[0] + box[2]) / 2), int((box[1] + box[3]) / 2)

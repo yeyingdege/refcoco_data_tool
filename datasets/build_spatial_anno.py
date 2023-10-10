@@ -119,7 +119,7 @@ def traverse_datasets(root="data/refcoco/anns_spatial", num_vis_image=5):
                 iname = dataset.idx_to_iname[i]
                 ann = dataset.anns[iname]
                 box = ann["box"]
-                visualize_image_info(iname, boxes=None, phrase=None, collect_box_text=box, 
+                visualize_image_info(iname, collect_box_text=box, 
                                      draw_phrase=True, out_dir=f'output/{version}/{split}')
     out_csv_file = "output/info.csv"
     with open(out_csv_file, "w") as fp:
