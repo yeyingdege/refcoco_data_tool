@@ -1,0 +1,28 @@
+Under
+Over
+Above
+Below
+Inside
+Outside
+Far
+Beside
+Between
+Among
+Behind
+Front
+In front
+In front of
+Across
+Along
+Around
+Away from
+Towards
+Against
+Upon
+Beyond
+Next to
+Left
+Right
+Bottom
+Middle
+Top
