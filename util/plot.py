@@ -1,6 +1,7 @@
 import os
 import os.path as osp
 from PIL import Image, ImageDraw, ImageFont
+from textwrap3 import wrap
 
 
 def visualize_image_info(image_name, boxes=None, phrase=None, collect_box_text=None, draw_phrase=False, 
@@ -44,6 +45,32 @@ def visualize_image_info(image_name, boxes=None, phrase=None, collect_box_text=N
         # draw.text((box[0]+10, box[1] + (c+1)*15), box_str, fill=color_set[ii], font=fnt_small)
     os.makedirs(out_dir, exist_ok=True)
     img.save(f"{out_dir}/{image_name}")
+
+
+def visualize_image_caption_abs_obj(image_name, caption, objs, out_dir='output',
+                                    image_dir="data/refcoco/images/train2014"):
+    '''Visualize image caption and absent objects.
+    '''
+    color_set = [(255,0,0), (0,255,0), (0,0,255)]
+    fnt_small = ImageFont.truetype("STXINWEI.TTF", size=20)
+    margin = offset = 10
+
+    img_file = osp.join(image_dir, image_name)
+    img = Image.open(img_file)
+    if img.mode == "L": # grayscale image
+        img = img.convert("RGB")
+    draw = ImageDraw.Draw(img)
+    obj_text = ",".join(objs)
+    
+    for line in wrap(caption, width=50):
+        draw.text((margin, offset), line, font=fnt_small, fill=color_set[0])
+        offset += fnt_small.getsize(line)[1]
+    for line in wrap(obj_text, width=50):
+        draw.text((margin, offset), line, font=fnt_small, fill=color_set[1])
+        offset += fnt_small.getsize(line)[1]
+
+    os.makedirs(out_dir, exist_ok=True)
+    img.save(f"{out_dir}/caption_{image_name}")
 
 
 def resize_image_with_aspect_ratio(image, new_width):
