@@ -6,3 +6,4 @@ opencv-python
 transformers
 openai
 python-dotenv
+textwrap3
