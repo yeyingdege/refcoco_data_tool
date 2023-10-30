@@ -31,7 +31,7 @@ def gen_absent_object_prompt(caption):
     return prompt
 
 
-def gen_hallucinate_object_prompt(phrase, object):
+def gen_halluc_phrase_prompt(phrase, object):
     prompt = f"""
     Given a phrase and an object, first, locate the target object in phrase. Second, replace \
     the target object with the given object. Phrase: {phrase}, object: {object}. \

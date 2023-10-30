@@ -40,4 +40,6 @@ class Chatgpt:
             new_s = new_s[1:-1]
         l = new_s.split(",")
         l = [e.strip() for e in l]
-        return l
+        # remove quotes
+        ll = [w[1:-1] for w in l if w[0] == "'" and w[-1] == "'"]
+        return ll
