@@ -1,3 +1,6 @@
 *__pycache__
 data/refcoco
 output
+
+GroundingDINO
+*.pth

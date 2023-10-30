@@ -1,5 +1,6 @@
 import os
 import os.path as osp
+import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 from textwrap3 import wrap
 
@@ -87,3 +88,14 @@ def resize_image_with_aspect_ratio(image, new_width):
     # Resize the image using the new dimensions
     resized_image = image.resize((new_width, new_height))
     return resized_image
+
+
+def read_image_pil(image_input) -> Image.Image:
+    if type(image_input) == str:
+        image = Image.open(image_input).convert("RGB")
+    elif type(image_input) == np.ndarray:
+        image = Image.fromarray(image_input)
+    else: # Image.Image
+        image = image_input
+    return image
+
