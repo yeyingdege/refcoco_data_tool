@@ -14,10 +14,10 @@ class SpatialReasoningDataset(Dataset):
         self.split = split
         self.im_dir = im_dir
         self.ann_root = ann_root
-        self.anns = self._load_annotations()
+        self.anns, self.ann_file = self._load_annotations()
         self.idx_to_iname = self.get_idx_to_image_name()
+        self._update_image_info_to_ann()
         self.data = self.get_phrase_and_image_info()
-        #TODO: load bbox info of each image
 
 
     def _load_annotations(self):
@@ -26,8 +26,17 @@ class SpatialReasoningDataset(Dataset):
         ann_name = f"{self.version}_{self.split}_dict.pth"
         ann_file = os.path.join(ann_dir, ann_name)
         anns = torch.load(ann_file)
-        return anns
-    
+        return anns, ann_file
+
+
+    def _update_image_info_to_ann(self):
+        for iname, v in self.anns.items():
+            image_path = os.path.join(self.im_dir, iname)
+            img = Image.open(image_path).convert("RGB")
+            w, h = img.size
+            v["image_size"] = [w, h]
+        torch.save(self.anns, self.ann_file)
+
 
     def get_idx_to_image_name(self):
         anns = []
