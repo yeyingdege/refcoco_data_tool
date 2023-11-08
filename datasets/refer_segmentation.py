@@ -2,9 +2,9 @@
 import os
 import os.path as osp
 import numpy as np
-from grounding_datasets import ReferSegDataset
+from .grounding_datasets import ReferSegDataset
 from PIL import Image, ImageDraw, ImageFont
-import transforms as T
+from . import transforms as T
 import torch
 
 class RefCOCO(ReferSegDataset):

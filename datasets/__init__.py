@@ -9,9 +9,9 @@
 
 import torch.utils.data
 
-from refer_multiphrase import build_flickr30k
-from refer_segmentation import build_refcoco_segmentation
-from refer_resc import build_flickr30k_resc, build_refcoco_resc, build_referit_resc, build_visualgenome, GeneralReferDataset
+# from refer_multiphrase import build_flickr30k
+from .refer_segmentation import build_refcoco_segmentation
+# from refer_resc import build_flickr30k_resc, build_refcoco_resc, build_referit_resc, build_visualgenome, GeneralReferDataset
 
 
 def build_refer_dataset(image_set, args):
