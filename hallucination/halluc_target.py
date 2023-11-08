@@ -35,22 +35,28 @@ class HallucTarget():
     
 
     def gen_absent_object_all(self, out_dir, num_vis=10):
+        os.makedirs(out_dir, exist_ok=True)
         result_dict = {}
         for i in range(len(self.images)):
+            print(i)
             image = self.images[i]
-            caption_info = self.captions[image].copy()
-            caption = caption_info["caption"]
-            abs_objs = self.gen_absent_object(caption)
-            abs_unsuitable_objs = self.gen_absent_unsuitable_object(caption)
-            result_dict[image] = {"caption": caption, 
-                                  "absent_suitable_objs": abs_objs,
-                                  "absent_unsuitable_objs": abs_unsuitable_objs}
-            result_dict[image] = {"caption": caption, 
-                                  "absent_suitable_objs": abs_objs}
+            out_file = os.path.join(out_dir, f"{i}.json")
+            if os.path.exists(out_file):
+                curr_dict = json.load(open(out_file))
+            else:
+                caption_info = self.captions[image].copy()
+                caption = caption_info["caption"]
+                abs_objs = self.gen_absent_object(caption)
+
+                curr_dict = {"caption": caption,
+                            "absent_suitable_objs": abs_objs}
+                with open(out_file, "w") as fp:
+                    json.dump(curr_dict, fp)
+
+            result_dict[image] = curr_dict
 
             if i < num_vis:
                 visualize_image_caption_abs_obj(image, caption, abs_objs, out_dir=out_dir)
-                visualize_image_caption_abs_obj(image, caption, abs_unsuitable_objs, out_dir=out_dir+"_unsuitable")
         out_file = os.path.join(out_dir, "absent_objects.json")
         with open(out_file, "w") as fp:
             json.dump(result_dict, fp)
@@ -75,8 +81,7 @@ def get_obj_grounding_score_all(file="output/absent_objects.json",
     infos = json.load(open(file))
     for iname, v in infos.items():
         img = read_image_pil(os.path.join(im_dir, iname))
-        objects = [w[1:-1] for w in v["absent_suitable_objs"] if w[0] == "'" and w[-1] == "'"]
-        v["absent_suitable_objs"] = objects
+        objects = v["absent_suitable_objs"]
         scores = get_obj_grounding_score(img, objects, detector)
         v["grounding_score"] = scores
     with open(file, "w") as fp:
@@ -88,5 +93,5 @@ def get_obj_grounding_score_all(file="output/absent_objects.json",
 if __name__ == "__main__":
     chatgpt = Chatgpt()
     htarget = HallucTarget(chatgpt, "data/refcoco/anns_spatial/captions_with_grounding.json")
-    htarget.gen_absent_object_all(out_dir="output/val")
-    get_obj_grounding_score_all(file="path/to/absent/objects/file.json")
+    # htarget.gen_absent_object_all(out_dir="output/response", num_vis=0)
+    # get_obj_grounding_score_all()
