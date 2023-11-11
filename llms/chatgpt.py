@@ -43,3 +43,13 @@ class Chatgpt:
         # remove quotes
         ll = [w[1:-1] for w in l if w[0] == "'" and w[-1] == "'"]
         return ll
+    
+
+    def parse_phrase(self, s):
+        pos = s.find("Output:")
+        if pos < 0:
+            new_s = s
+        else:
+            new_s = s[pos+len("Output:"):]
+        new_s = new_s.strip()
+        return new_s
