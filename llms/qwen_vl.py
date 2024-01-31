@@ -1,4 +1,5 @@
 import os
+import re
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from transformers.generation import GenerationConfig
 import torch
@@ -24,7 +25,7 @@ class Qwen_VL():
         self.default_grounding_prompt = "Generate the caption in English with grounding:"
 
 
-    def get_response(self, image, text=None):
+    def get_response(self, image, text=None, opt="caption"):
         """
         image: Either an absolute local path or an url
         text: text prompt
@@ -40,12 +41,16 @@ class Qwen_VL():
         pred = self.model.generate(**inputs)
         raw_response = self.tokenizer.decode(pred.cpu()[0], skip_special_tokens=False)
         
-        result_dict = self._process_response(raw_response, txt_pt=text)
-        # image = self.tokenizer.draw_bbox_on_latest_picture(raw_response)
-        # if image:
-        #     image.save('2.jpg')
-        # else:
-        #     print("no box")
+        if opt == "caption":
+            result_dict = self._process_response(raw_response, txt_pt=text)
+        else:
+            result_dict = self._process_obj_bbox(raw_response, txt_pt=text)
+
+            image = self.tokenizer.draw_bbox_on_latest_picture(raw_response)
+            if image:
+                image.save('2.jpg')
+            else:
+                print("no box")
         return result_dict
 
 
@@ -61,6 +66,24 @@ class Qwen_VL():
                        "bboxes": bbox,
                        "phrases": phrases}
         return result_dict
+    
+    def _process_obj_bbox(self, response, txt_pt, endoftext="<|endoftext|>"):
+        start = response.find(txt_pt)
+        out_str = response[start+len(txt_pt):]
+        out_str = out_str.replace(endoftext, "")
+        pattern_obj = r'<ref>(.*?)</ref>'
+        objects = re.findall(pattern_obj, out_str)
+        
+        final_objs = []
+        bboxes = []
+        for obj in objects:
+            prefix = f'{obj}</ref><box>'
+            pattern_bbox = rf'{prefix}(.*?)</box>'
+            bbox = re.findall(pattern_bbox, out_str)
+            final_objs.append(obj.strip())
+            bboxes.append(bbox[0])
+        result = {"bboxes": bboxes, "phrases": final_objs}
+        return result
     
     def _extract_ref(self, s):
         phrases = []
@@ -88,6 +111,6 @@ if __name__=="__main__":
     test_image = os.path.join(os.getcwd(), test_image)
 
     qwen = Qwen_VL()
-    response = qwen.get_response(test_image, text=qwen.default_grounding_prompt)
-    print(response["processed_response"])
+    response = qwen.get_response(test_image, text=qwen.default_grounding_prompt, opt="det")
+    print(response["phrases"], response["bboxes"])
 
